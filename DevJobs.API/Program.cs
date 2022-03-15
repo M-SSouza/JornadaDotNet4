@@ -2,8 +2,6 @@ using DevJobs.API.Persistence;
 using DevJobs.API.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using Serilog;
-using Serilog.Sinks.MSSqlServer;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,8 +9,11 @@ var builder = WebApplication.CreateBuilder(args);
 
 string connectionString = builder.Configuration.GetConnectionString("DevJobsCs");
 
+//builder.Services.AddDbContext<DevJobsContext>(options =>
+//        options.UseSqlServer(connectionString)
+//    );
 builder.Services.AddDbContext<DevJobsContext>(options =>
-        options.UseSqlServer(connectionString)
+        options.UseInMemoryDatabase("DevJobs")
     );
 
 builder.Services.AddScoped<IJobVacancyRepository, JobVacancyRepository>();
@@ -41,19 +42,19 @@ builder.Services.AddSwaggerGen(c =>
     c.IncludeXmlComments(xmlPath);
 });
 
-builder.Host.ConfigureAppConfiguration((hostingContext, config) =>
-{
-    Serilog.Log.Logger = new LoggerConfiguration()
-    .Enrich.FromLogContext()
-    .WriteTo.MSSqlServer(connectionString,
-    sinkOptions: new MSSqlServerSinkOptions()
-    {
-        AutoCreateSqlTable = true,
-        TableName = "Logs"
-    })
-    .WriteTo.Console()
-    .CreateLogger();
-}).UseSerilog();
+//builder.Host.ConfigureAppConfiguration((hostingContext, config) =>
+//{
+//    Serilog.Log.Logger = new LoggerConfiguration()
+//    .Enrich.FromLogContext()
+//    .WriteTo.MSSqlServer(connectionString,
+//    sinkOptions: new MSSqlServerSinkOptions()
+//    {
+//        AutoCreateSqlTable = true,
+//        TableName = "Logs"
+//    })
+//    .WriteTo.Console()
+//    .CreateLogger();
+//}).UseSerilog();
 
 var app = builder.Build();
 
